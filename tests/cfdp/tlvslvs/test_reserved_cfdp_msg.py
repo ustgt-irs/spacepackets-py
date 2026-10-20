@@ -65,8 +65,8 @@ class TestReservedMsg(TestCase):
         self.proxy_cancel_request = ProxyCancelRequest()
 
         self.dir_path_lv = CfdpLv.from_str("/tmp")
-        self.dir_listing_name_lv = CfdpLv.from_str("/tmp/listing.txt")
-        self.dir_params = DirectoryParams(self.dir_path_lv, self.dir_listing_name_lv)
+        self.listing_file_lv = CfdpLv.from_str("/tmp/listing.txt")
+        self.dir_params = DirectoryParams(self.dir_path_lv, self.listing_file_lv)
         self.dir_listing_req = DirectoryListingRequest(self.dir_params)
         self.dir_listing_response = DirectoryListingResponse(True, self.dir_params)
         self.dir_lst_opt_recursive = True
@@ -234,13 +234,13 @@ class TestReservedMsg(TestCase):
         dir_listing_req_raw = self.dir_listing_req.pack()
         self._generic_raw_data_verification(
             dir_listing_req_raw,
-            self.dir_path_lv.packet_len + self.dir_listing_name_lv.packet_len,
+            self.dir_path_lv.packet_len + self.listing_file_lv.packet_len,
             DirectoryOperationMessageType.LISTING_REQUEST,
         )
         dir_path_lv = CfdpLv.unpack(dir_listing_req_raw[7:])
-        dir_listing_name_lv = CfdpLv.unpack(dir_listing_req_raw[7 + dir_path_lv.packet_len :])
+        listing_file_lv = CfdpLv.unpack(dir_listing_req_raw[7 + dir_path_lv.packet_len :])
         self.assertEqual(dir_path_lv, self.dir_path_lv)
-        self.assertEqual(dir_listing_name_lv, self.dir_listing_name_lv)
+        self.assertEqual(listing_file_lv, self.listing_file_lv)
 
     def test_dir_listing_req_unpack(self):
         dir_listing_req_params = self.dir_listing_req.get_dir_listing_request_params()
@@ -265,15 +265,15 @@ class TestReservedMsg(TestCase):
         dir_listing_response_raw = self.dir_listing_response.pack()
         self._generic_raw_data_verification(
             dir_listing_response_raw,
-            1 + self.dir_path_lv.packet_len + self.dir_listing_name_lv.packet_len,
+            1 + self.dir_path_lv.packet_len + self.listing_file_lv.packet_len,
             DirectoryOperationMessageType.LISTING_RESPONSE,
         )
         success_response = ((dir_listing_response_raw[7] >> 7) & 0b1) == 0
         dir_path_lv = CfdpLv.unpack(dir_listing_response_raw[8:])
-        dir_listing_name_lv = CfdpLv.unpack(dir_listing_response_raw[8 + dir_path_lv.packet_len :])
+        listing_file_lv = CfdpLv.unpack(dir_listing_response_raw[8 + dir_path_lv.packet_len :])
         self.assertTrue(success_response)
         self.assertEqual(self.dir_path_lv, dir_path_lv)
-        self.assertEqual(self.dir_listing_name_lv, dir_listing_name_lv)
+        self.assertEqual(self.listing_file_lv, listing_file_lv)
 
     def test_dir_listing_response_unpack(self):
         dir_listing_response_params = self.dir_listing_req.get_dir_listing_request_params()
