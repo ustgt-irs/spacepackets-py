@@ -128,10 +128,10 @@ class TmTransferFrame:
         self,
         length: int,
         primary_header: TmFramePrimaryHeader,
-        secondary_header: None | TransferFrameSecondaryHeader,
+        secondary_header: TransferFrameSecondaryHeader | None,
         data_field: bytes,
-        op_ctrl_field: None | bytes,
-        frame_error_control: None | bytes,
+        op_ctrl_field: bytes | None,
+        frame_error_control: bytes | None,
     ) -> None:
         if length < 2048:  # According to CCSDS TM SYNCHRONIZATION AND CHANNEL CODING Blue Book
             self.length = length

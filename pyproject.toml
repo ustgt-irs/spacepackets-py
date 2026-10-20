@@ -7,7 +7,7 @@ name = "spacepackets"
 description = "Various CCSDS and ECSS packet implementations"
 readme = "README.md"
 version = "0.32.0"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 license = {text = "Apache-2.0"}
 authors = [
   {name = "Robin Mueller", email = "robin.mueller.m@gmail.com"}
@@ -20,16 +20,19 @@ classifiers = [
     "Operating System :: POSIX",
     "Operating System :: Microsoft :: Windows",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Topic :: Communications",
     "Topic :: Software Development :: Libraries",
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Topic :: Scientific/Engineering"
 ]
 dependencies = [
-    "fastcrc ~= 0.3.0",
-    "deprecation ~= 2.1"
+    "fastcrc >= 0.3",
+    "deprecation >= 2.1"
 ]
 
 [project.optional-dependencies]
@@ -124,5 +127,5 @@ testpaths = ["tests"]
 
 [dependency-groups]
 dev = [
-    "ruff>=0.15.5",
+    "ruff>=0.17.1",
 ]

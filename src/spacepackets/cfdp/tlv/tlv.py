@@ -407,7 +407,7 @@ class FileStoreResponseTlv(FileStoreRequestBase, AbstractTlvBase):
         status_code: FilestoreResponseStatusCode,
         first_file_name: str,
         second_file_name: str = "",
-        filestore_msg: None | CfdpLv = None,
+        filestore_msg: CfdpLv | None = None,
     ):
         if filestore_msg is None:
             filestore_msg = CfdpLv(value=b"")

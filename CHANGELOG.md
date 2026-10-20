@@ -8,6 +8,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 # [unreleased]
 
+- Python 3.9 is not supported anymore as it has reached end-of-life.
+
+## Added
+
+- Official Python 3.14 support.
+
+## Changed
+
+- Relaxed the `fastcrc` requirement from `~= 0.3.0` to `>= 0.3` and the `deprecation`
+  requirement from `~= 2.1` to `>= 2.1`.
+
 # [v0.32.0] 2026-03-03
 
 ## Fixed

@@ -1,6 +1,5 @@
 import enum
 from dataclasses import dataclass, field
-from typing import Optional
 
 from spacepackets.ecss.pus_1_verification import MessageSubtype, RequestId, Service1Tm
 from spacepackets.ecss.tc import PusTc
@@ -63,7 +62,7 @@ class PusVerificator:
         self._verif_dict.update({req_id: VerificationStatus()})
         return True
 
-    def add_tm(self, pus_1_tm: Service1Tm) -> Optional[TmCheckResult]:
+    def add_tm(self, pus_1_tm: Service1Tm) -> TmCheckResult | None:
         req_id = pus_1_tm.tc_req_id
         if req_id not in self._verif_dict:
             return None

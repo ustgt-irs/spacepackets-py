@@ -1,4 +1,4 @@
-from __future__ import annotations  # Python 3.9 compatibility for | syntax
+from __future__ import annotations
 
 from typing import Any
 
@@ -20,7 +20,7 @@ class TlvHolder:
         self.tlv = tlv
 
     @property
-    def tlv_type(self) -> None | TlvType:
+    def tlv_type(self) -> TlvType | None:
         if self.tlv is not None:
             return self.tlv.tlv_type
         return None
