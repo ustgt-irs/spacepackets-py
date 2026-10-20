@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, NoReturn, Union, cast
+from typing import Any, NoReturn, cast
 
 import deprecation
 
@@ -20,7 +20,7 @@ from spacepackets.cfdp.pdu.nak import NakPdu
 from spacepackets.cfdp.pdu.prompt import PromptPdu
 from spacepackets.version import get_version
 
-GenericPduPacket = Union[AbstractFileDirectiveBase, AbstractPduBase]
+GenericPduPacket = AbstractFileDirectiveBase | AbstractPduBase
 
 
 class PduHolder:

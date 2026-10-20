@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-import datetime
 import enum
 import math
 import struct
 import time
+from datetime import datetime, timedelta, timezone
 
 import deprecation
 
@@ -82,13 +82,11 @@ class CdsShortTimestamp(CcsdsTimeProvider):
 
     def _calculate_date_time(self) -> None:
         if self._unix_seconds < 0:
-            self._datetime = datetime.datetime(
-                1970, 1, 1, tzinfo=datetime.timezone.utc
-            ) + datetime.timedelta(seconds=self._unix_seconds)
-        else:
-            self._datetime = datetime.datetime.fromtimestamp(
-                self._unix_seconds, tz=datetime.timezone.utc
+            self._datetime = datetime(1970, 1, 1, tzinfo=timezone.utc) + timedelta(
+                seconds=self._unix_seconds
             )
+        else:
+            self._datetime = datetime.fromtimestamp(self._unix_seconds, tz=timezone.utc)
 
     @property
     def pfield(self) -> bytes:
@@ -173,24 +171,24 @@ class CdsShortTimestamp(CcsdsTimeProvider):
     def __hash__(self) -> int:
         return hash((self._ccsds_days, self._ms_of_day))
 
-    def __add__(self, timedelta: datetime.timedelta):
+    def __add__(self, delta: timedelta):
         """Allows adding timedelta to the CDS timestamp provider.
 
-        :param timedelta:
+        :param delta:
         :raises TypeError: Type other than timedelta was passed.
         :raises OverflowError: CCSDS days would have an invalid value (exceeding value representable
             by 16 bits) after increment.
         :return:
         """
-        if not isinstance(timedelta, datetime.timedelta):
+        if not isinstance(delta, timedelta):
             raise TypeError("can only handle timedelta for additions")
-        self._ms_of_day += timedelta.microseconds // 1000 + timedelta.seconds * 1000
+        self._ms_of_day += delta.microseconds // 1000 + delta.seconds * 1000
         if self._ms_of_day > MS_PER_DAY:
             self._ms_of_day -= MS_PER_DAY
             self._ccsds_days += 1
             if self._ccsds_days > pow(2, 16) - 1:
                 raise OverflowError("CCSDS days overflow")
-        self._ccsds_days += timedelta.days
+        self._ccsds_days += delta.days
         if self._ccsds_days > pow(2, 16) - 1:
             raise OverflowError("CCSDS days overflow")
         self._setup()
@@ -199,7 +197,7 @@ class CdsShortTimestamp(CcsdsTimeProvider):
     @classmethod
     def now(cls) -> CdsShortTimestamp:
         """Returns a seven byte CDS short timestamp with the current time."""
-        return cls.from_datetime(datetime.datetime.now(tz=datetime.timezone.utc))
+        return cls.from_datetime(datetime.now(tz=timezone.utc))
 
     @classmethod
     @deprecation.deprecated(
@@ -221,7 +219,7 @@ class CdsShortTimestamp(CcsdsTimeProvider):
         return cls.now()
 
     @classmethod
-    def from_datetime(cls, dt: datetime.datetime) -> CdsShortTimestamp:
+    def from_datetime(cls, dt: datetime) -> CdsShortTimestamp:
         instance = cls.empty(False)
         instance._datetime = dt
         instance._unix_seconds = dt.timestamp()
@@ -239,7 +237,7 @@ class CdsShortTimestamp(CcsdsTimeProvider):
         current_version=get_version(),
         details="use from_datetime instead",
     )
-    def from_date_time(cls, dt: datetime.datetime) -> CdsShortTimestamp:
+    def from_date_time(cls, dt: datetime) -> CdsShortTimestamp:
         return cls.from_datetime(dt)
 
     @staticmethod
@@ -252,7 +250,7 @@ class CdsShortTimestamp(CcsdsTimeProvider):
     def as_unix_seconds(self) -> float:
         return self._unix_seconds
 
-    def as_datetime(self) -> datetime.datetime:
+    def as_datetime(self) -> datetime:
         return self._datetime
 
     @deprecation.deprecated(
@@ -260,5 +258,5 @@ class CdsShortTimestamp(CcsdsTimeProvider):
         current_version=get_version(),
         details="use as_datetime instead",
     )
-    def as_date_time(self) -> datetime.datetime:
+    def as_date_time(self) -> datetime:
         return self.as_datetime()

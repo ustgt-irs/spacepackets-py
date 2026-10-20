@@ -56,7 +56,7 @@ class PusTcDataFieldHeader:
 
     @classmethod
     def unpack(
-        cls, data: bytes | bytearray, source_id_len: None | int = None, spare_bytes: int = 0
+        cls, data: bytes | bytearray, source_id_len: int | None = None, spare_bytes: int = 0
     ) -> PusTcDataFieldHeader:
         """Unpack a PUS A TC data field header.
 

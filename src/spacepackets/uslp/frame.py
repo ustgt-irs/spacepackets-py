@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import enum
 import struct
-from typing import Union
 
 import fastcrc
 
@@ -22,7 +21,7 @@ from .header import (
     determine_header_type,
 )
 
-FrameHeaderT = Union[TruncatedPrimaryHeader, PrimaryHeader]
+FrameHeaderT = TruncatedPrimaryHeader | PrimaryHeader
 
 USLP_TFDF_MAX_SIZE = 65529
 
@@ -98,8 +97,8 @@ class VarFrameProperties(FramePropertiesBase):
         self.truncated_frame_len = truncated_frame_len
 
 
-FramePropertiesT = Union[FixedFrameProperties, VarFrameProperties]
-UslpHeaderT = Union[TruncatedPrimaryHeader, PrimaryHeader]
+FramePropertiesT = FixedFrameProperties | VarFrameProperties
+UslpHeaderT = TruncatedPrimaryHeader | PrimaryHeader
 
 
 class TfdzConstructionRules(enum.IntEnum):

@@ -1,5 +1,4 @@
 import warnings
-from typing import Optional
 from unittest import TestCase
 
 from spacepackets import PacketType, SpacePacketHeader
@@ -155,7 +154,7 @@ class Service1TmTest(TestCase):
         pus_tc: PusTc,
         srv_1_tm: Service1Tm,
         message_subtype: MessageSubtype,
-        step_id: Optional[PacketFieldEnum] = None,
+        step_id: PacketFieldEnum | None = None,
     ):
         self.assertEqual(srv_1_tm.pus_tm.message_subtype, message_subtype)
         self.assertEqual(srv_1_tm.tc_req_id.tc_packet_id, pus_tc.packet_id)
@@ -227,8 +226,8 @@ class Service1TmTest(TestCase):
         pus_tc: PusTc,
         srv_1_tm: Service1Tm,
         message_subtype: MessageSubtype,
-        failure_notice: Optional[FailureNotice],
-        step_id: Optional[PacketFieldEnum] = None,
+        failure_notice: FailureNotice | None,
+        step_id: PacketFieldEnum | None = None,
     ):
         self.assertEqual(srv_1_tm.pus_tm.message_subtype, message_subtype)
         self.assertEqual(srv_1_tm.tc_req_id.tc_packet_id, pus_tc.packet_id)
