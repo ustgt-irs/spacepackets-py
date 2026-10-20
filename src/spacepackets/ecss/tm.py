@@ -172,8 +172,8 @@ class PusTmSecondaryHeader:
                 f"found where PUS C {PusVersion.PUS_C} was expected"
             )
         secondary_header.spacecraft_time_ref = data[current_idx] & 0x0F
-        if secondary_header.header_size > len(data):
-            raise BytesTooShortError(secondary_header.header_size, len(data))
+        if len(data) < cls.MIN_LEN + timestamp_len:
+            raise BytesTooShortError(cls.MIN_LEN + timestamp_len, len(data))
         current_idx += 1
         secondary_header.service = data[current_idx]
         current_idx += 1
@@ -416,12 +416,13 @@ class PusTm(AbstractPusTm):
         )
         if expected_packet_len > len(data):
             raise BytesTooShortError(expected_packet_len, len(data))
+        sec_header_end = expected_packet_len
+        if managed_params.has_checksum:
+            sec_header_end -= 2
         pus_tm.pus_tm_sec_header = PusTmSecondaryHeader.unpack(
-            data=data[SPACE_PACKET_HEADER_SIZE:],
+            data=data[SPACE_PACKET_HEADER_SIZE:sec_header_end],
             timestamp_len=managed_params.timestamp_len,
         )
-        if expected_packet_len < pus_tm.pus_tm_sec_header.header_size + SPACE_PACKET_HEADER_SIZE:
-            raise ValueError("passed packet too short")
 
         pus_tm._has_checksum = managed_params.has_checksum
         if managed_params.has_checksum:

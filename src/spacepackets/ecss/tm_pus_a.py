@@ -118,8 +118,13 @@ class PusTmSecondaryHeader:
                 f"PUS version field value {secondary_header.pus_version} "
                 f"found where PUS A {PusVersion.PUS_A} was expected"
             )
-        if secondary_header.header_size > len(data):
-            raise BytesTooShortError(secondary_header.header_size, len(data))
+        expected_len = cls.MIN_LEN + timestamp_len + spare_bytes
+        if has_message_counter:
+            expected_len += 1
+        if dest_id_len is not None:
+            expected_len += dest_id_len
+        if len(data) < expected_len:
+            raise BytesTooShortError(expected_len, len(data))
         current_idx += 1
         secondary_header.service = data[current_idx]
         current_idx += 1
@@ -132,6 +137,7 @@ class PusTmSecondaryHeader:
             secondary_header.dest_id = UnsignedByteField.from_bytes(
                 data[current_idx : current_idx + dest_id_len]
             )
+            current_idx += dest_id_len
         secondary_header.timestamp = data[current_idx : current_idx + timestamp_len]
         secondary_header.spare_bytes = spare_bytes
         return secondary_header
@@ -313,13 +319,11 @@ class PusTm(AbstractPusTm):
         if expected_packet_len > len(data):
             raise BytesTooShortError(expected_packet_len, len(data))
         pus_tm.pus_tm_sec_header = PusTmSecondaryHeader.unpack(
-            data=data[SPACE_PACKET_HEADER_SIZE:],
+            data=data[SPACE_PACKET_HEADER_SIZE : expected_packet_len - 2],
             timestamp_len=timestamp_len,
             has_message_counter=has_message_counter,
             dest_id_len=dest_id_len,
         )
-        if expected_packet_len < pus_tm.pus_tm_sec_header.header_size + SPACE_PACKET_HEADER_SIZE:
-            raise ValueError("passed packet too short")
         pus_tm._source_data = data[
             pus_tm.pus_tm_sec_header.header_size + SPACE_PACKET_HEADER_SIZE : expected_packet_len
             - 2

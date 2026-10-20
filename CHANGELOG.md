@@ -19,6 +19,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Relaxed the `fastcrc` requirement from `~= 0.3.0` to `>= 0.3` and the `deprecation`
   requirement from `~= 2.1` to `>= 2.1`.
 
+## Fixed
+
+- PUS TM unpacking (PUS C and PUS A) now raises `BytesTooShortError` for packets which are too
+  short for the expected secondary header. Previously, the timestamp could be read from the CRC
+  bytes. See GitHub issue #147.
+- PUS A TM unpacking now skips the destination ID before reading the timestamp.
+
 # [v0.32.0] 2026-03-03
 
 ## Fixed

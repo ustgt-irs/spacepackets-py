@@ -328,6 +328,20 @@ class TestTelemetry(TestCase):
         self.assertRaises(TypeError, PusTm.unpack, None, None)
         self.assertRaises(BytesTooShortError, PusTm.unpack, bytearray(), None)
 
+    def test_unpack_timestamp_longer_than_packet_issue_147(self):
+        # Reproducer from GitHub issue #147. The timestamp slice used to run into the CRC.
+        raw = PusTm(service=17, message_subtype=2, apid=0x10, timestamp=b"\x01").pack()
+        self.assertEqual(raw.hex(), "0810c000000920110200000000018e9b")
+        with self.assertRaises(BytesTooShortError):
+            PusTm.unpack(raw, timestamp_len=7)
+
+    def test_unpack_no_checksum_timestamp_longer_than_packet(self):
+        raw = PusTm(
+            service=17, message_subtype=2, apid=0x10, timestamp=b"\x01", has_checksum=False
+        ).pack()
+        with self.assertRaises(BytesTooShortError):
+            PusTm.unpack_no_checksum(raw, timestamp_len=2)
+
     def test_invalid_sec_header_unpack(self):
         invalid_secondary_header = bytearray([0x20, 0x00, 0x01, 0x06])
         self.assertRaises(ValueError, PusTmSecondaryHeader.unpack, invalid_secondary_header, None)

@@ -22,7 +22,7 @@ from spacepackets.ecss.tm_pus_a import (
     PusTmSecondaryHeader,
 )
 from spacepackets.exceptions import BytesTooShortError
-from spacepackets.util import PrintFormats, get_printable_data_string
+from spacepackets.util import PrintFormats, UnsignedByteField, get_printable_data_string
 
 from .common import TEST_STAMP
 
@@ -232,6 +232,41 @@ class TestTelemetry(TestCase):
     def test_faulty_unpack(self):
         self.assertRaises(TypeError, PusTm.unpack, None, None)
         self.assertRaises(BytesTooShortError, PusTm.unpack, bytearray(), 0, None, False)
+
+    def test_unpack_timestamp_longer_than_packet_issue_147(self):
+        # Reproducer from GitHub issue #147, PUS A variant.
+        raw = PusTm(service=17, subservice=2, apid=0x10, timestamp=b"\x01").pack()
+        with self.assertRaises(BytesTooShortError):
+            PusTm.unpack(raw, timestamp_len=7, has_message_counter=False, dest_id_len=None)
+
+    def test_unpack_two_byte_sec_header_issue_147(self):
+        # GitHub issue #147: a 2-byte secondary header with a valid CRC used to unpack with
+        # subservice and message counter taken from the CRC bytes.
+        raw = bytearray([0x08, 0x10, 0xC0, 0x00, 0x00, 0x03, 0x10, 0x11])
+        raw.extend(struct.pack("!H", fastcrc.crc16.ibm_3740(bytes(raw))))
+        with self.assertRaises(BytesTooShortError):
+            PusTm.unpack(raw, timestamp_len=0, has_message_counter=True, dest_id_len=None)
+
+    def test_unpack_missing_message_counter(self):
+        raw = PusTm(service=17, subservice=2, apid=0x10, timestamp=b"").pack()
+        with self.assertRaises(BytesTooShortError):
+            PusTm.unpack(raw, timestamp_len=0, has_message_counter=True, dest_id_len=None)
+
+    def test_unpack_with_dest_id(self):
+        tm = PusTm(
+            service=17,
+            subservice=2,
+            apid=0x10,
+            timestamp=b"\xaa\xbb",
+            source_data=b"\x01\x02",
+            destination_id=UnsignedByteField(0x55, 1),
+        )
+        tm_unpacked = PusTm.unpack(
+            tm.pack(), timestamp_len=2, has_message_counter=False, dest_id_len=1
+        )
+        self.assertEqual(tm_unpacked.pus_tm_sec_header.dest_id, UnsignedByteField(0x55, 1))
+        self.assertEqual(tm_unpacked.timestamp, b"\xaa\xbb")
+        self.assertEqual(tm_unpacked.source_data, b"\x01\x02")
 
     def test_invalid_sec_header_unpack(self):
         invalid_secondary_header = bytearray([0x20, 0x00, 0x01, 0x06])
