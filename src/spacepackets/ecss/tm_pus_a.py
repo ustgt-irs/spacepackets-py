@@ -97,7 +97,7 @@ class PusTmSecondaryHeader:
         data: bytes | bytearray,
         timestamp_len: int,
         has_message_counter: bool = False,
-        dest_id_len: None | int = None,
+        dest_id_len: int | None = None,
         spare_bytes: int = 0,
     ) -> PusTmSecondaryHeader:
         """Unpack the PUS TM secondary header from the raw packet starting at the header index.
@@ -227,7 +227,7 @@ class PusTm(AbstractPusTm):
         apid: int = 0,
         seq_count: int = 0,
         message_counter: int | None = None,
-        destination_id: None | UnsignedByteField = None,
+        destination_id: UnsignedByteField | None = None,
         packet_version: int = 0b000,
         sec_header_spare_bytes: int = 0,
     ):
@@ -471,7 +471,7 @@ class PusTm(AbstractPusTm):
 
     @staticmethod
     def data_len_from_src_len_timestamp_len(
-        timestamp_len: int, source_data_len: int, has_message_counter: bool, dest_id_len: None | int
+        timestamp_len: int, source_data_len: int, has_message_counter: bool, dest_id_len: int | None
     ) -> int:
         """Retrieve size of TM packet data header in bytes. Only support PUS C
         Formula according to PUS Standard: C = (Number of octets in packet source data field) - 1.

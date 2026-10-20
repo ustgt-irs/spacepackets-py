@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-import datetime
 import enum
 from abc import ABC, abstractmethod
+from datetime import datetime, timezone
 
 import deprecation
 
@@ -14,7 +14,7 @@ DAYS_CCSDS_TO_UNIX = -4383
 SECONDS_PER_DAY: int = 86400
 #: Milliseconds per day as integer
 MS_PER_DAY: int = SECONDS_PER_DAY * 1000
-UNIX_EPOCH = datetime.datetime.fromtimestamp(0, tz=datetime.timezone.utc)
+UNIX_EPOCH = datetime.fromtimestamp(0, tz=timezone.utc)
 
 
 class CcsdsTimeCodeId(enum.IntEnum):
@@ -90,11 +90,11 @@ class CcsdsTimeProvider(ABC):
         current_version=get_version(),
         details="use as_date_time instead",
     )
-    def as_datetime(self) -> datetime.datetime:
+    def as_datetime(self) -> datetime:
         return self.as_date_time()
 
     @abstractmethod
-    def as_date_time(self) -> datetime.datetime:
+    def as_date_time(self) -> datetime:
         """Retrieve a :py:class:`datetime.datetime` with the :py:class:`datetime.timezone` set to
         utc.
         """
