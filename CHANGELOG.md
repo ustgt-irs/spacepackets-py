@@ -18,6 +18,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Relaxed the `fastcrc` requirement from `~= 0.3.0` to `>= 0.3` and the `deprecation`
   requirement from `~= 2.1` to `>= 2.1`.
+- Renamed `DirectoryParams.dir_file_name` to `requester_listing_file`, together with its
+  accessors and the `from_strs` and `from_paths` arguments. The field is the file at the filestore
+  of the requesting entity which receives the directory listing.
 
 ## Fixed
 

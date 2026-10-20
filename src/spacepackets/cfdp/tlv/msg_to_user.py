@@ -234,8 +234,8 @@ class ReservedCfdpMessage(AbstractTlvBase):
         ):
             return None
         dir_path_lv = CfdpLv.unpack(self.value[5:])
-        dir_file_name_lv = CfdpLv.unpack(self.value[5 + dir_path_lv.packet_len :])
-        return DirectoryParams(dir_path_lv, dir_file_name_lv)
+        listing_file_lv = CfdpLv.unpack(self.value[5 + dir_path_lv.packet_len :])
+        return DirectoryParams(dir_path_lv, listing_file_lv)
 
     def get_dir_listing_response_params(self) -> tuple[bool, DirectoryParams] | None:
         """
@@ -256,8 +256,8 @@ class ReservedCfdpMessage(AbstractTlvBase):
             )
         listing_success = ((self.value[5] >> 7) & 0b1) == 0
         dir_path_lv = CfdpLv.unpack(self.value[6:])
-        dir_file_name_lv = CfdpLv.unpack(self.value[6 + dir_path_lv.packet_len :])
-        return listing_success, DirectoryParams(dir_path_lv, dir_file_name_lv)
+        listing_file_lv = CfdpLv.unpack(self.value[6 + dir_path_lv.packet_len :])
+        return listing_success, DirectoryParams(dir_path_lv, listing_file_lv)
 
     def get_dir_listing_options(self) -> DirListingOptions | None:
         if (
@@ -341,16 +341,22 @@ class OriginatingTransactionId(ReservedCfdpMessage):
 
 @dataclasses.dataclass
 class DirectoryParams:
+    """Parameters of the directory listing request and response, see CCSDS 727.0-B-5 6.3.3.2.
+
+    ``requester_listing_file`` is the file path at the filestore local to the requesting entity.
+    The responder puts the directory listing into this file.
+    """
+
     dir_path: CfdpLv
-    dir_file_name: CfdpLv
+    requester_listing_file: CfdpLv
 
     @classmethod
-    def from_strs(cls, dir_path: str, dir_file_name: str) -> DirectoryParams:
-        return cls(CfdpLv.from_str(dir_path), CfdpLv.from_str(dir_file_name))
+    def from_strs(cls, dir_path: str, requester_listing_file: str) -> DirectoryParams:
+        return cls(CfdpLv.from_str(dir_path), CfdpLv.from_str(requester_listing_file))
 
     @classmethod
-    def from_paths(cls, dir_path: Path, dir_file_name: Path) -> DirectoryParams:
-        return cls(CfdpLv.from_path(dir_path), CfdpLv.from_path(dir_file_name))
+    def from_paths(cls, dir_path: Path, requester_listing_file: Path) -> DirectoryParams:
+        return cls(CfdpLv.from_path(dir_path), CfdpLv.from_path(requester_listing_file))
 
     @property
     def dir_path_as_str(self) -> str:
@@ -361,12 +367,12 @@ class DirectoryParams:
         return Path(self.dir_path_as_str)
 
     @property
-    def dir_file_name_as_str(self) -> str:
-        return self.dir_file_name.value.decode()
+    def requester_listing_file_as_str(self) -> str:
+        return self.requester_listing_file.value.decode()
 
     @property
-    def dir_file_name_as_path(self) -> Path:
-        return Path(self.dir_file_name_as_str)
+    def requester_listing_file_as_path(self) -> Path:
+        return Path(self.requester_listing_file_as_str)
 
 
 @dataclasses.dataclass
@@ -378,7 +384,7 @@ class DirListingOptions:
 class DirectoryListingRequest(ReservedCfdpMessage):
     def __init__(self, params: DirectoryParams):
         """Create a directory listing request."""
-        value = params.dir_path.pack() + params.dir_file_name.pack()
+        value = params.dir_path.pack() + params.requester_listing_file.pack()
         super().__init__(DirectoryOperationMessageType.LISTING_REQUEST, value)
 
 
@@ -397,7 +403,7 @@ class DirectoryListingResponse(ReservedCfdpMessage):
         value = (
             bytes([0x00 if listing_success else 0x80])
             + dir_params.dir_path.pack()
-            + dir_params.dir_file_name.pack()
+            + dir_params.requester_listing_file.pack()
         )
         super().__init__(DirectoryOperationMessageType.LISTING_RESPONSE, value)
 
